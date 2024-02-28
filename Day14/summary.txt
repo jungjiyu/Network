@@ -1,0 +1,331 @@
+
+
+Router 의 역할 
+	: L3 장비
+	: 서로 다른 Network 를 연결하고 Broadcast Domain 을 나눈다
+	: 기능
+		1. 라우팅
+			: 수신한 packet 의 목적지 IP 주소를 보고 packet 을 전송할 최적의 경로 설정
+				
+		2. 스위칭 
+			: 방향 전환 
+			: 결정된 경로대로 패킷 전송
+
+		3. NAT 기능
+			: 사설 IP 를 공인 IP 로 바꿔준다
+
+
+
+	: 라우터 종류
+		1. 단독형 >> 일체형으로 이미 모든 interface 가 구성되있음. 확장성x
+			: 잘 안쓴다
+		2. 모듈형 >> 사용자의 필요에 따라서 interface 모듈을 직접 꽂아서 사용 가능 . 확상성0
+
+	: 라우터의 포트 종류
+		: 내부 내트웍 인터페이스  >> 1:1 통신을 위한게 아니라 1:n 통신이니까 내부 내트웍과 연결하는 포트필요
+			: ex>> (fast) Ethernet  포트
+			: 그러니까 LAN 구간의 Interface 를 의미
+
+		: 외부 내트웍 인터페이스 >> 외부로 나가기 위한 포트
+			: WAN 구간의 interface 를 의미
+			: ex) serial interface
+
+		: 관리용 인터페이스 Console Port
+
+	: 라우터에 사용되는 케이블 종류
+		1) V.35  WAN 구간(Serial Interface)에 사용되는 케이블 중 하나
+			: 그러니까 라우터와 외부 라우터를 연결하는 케이블
+ 		2) UTP  LAN 구간(Ethernet Interface)에 사용되는 케이블
+			: 그러니까 라우터와 호스트들(컴퓨터들) 을 연결하는 케이블
+ 		3) Console cable : 장비 관리용 케이블
+			: 암묵적으로 하늘색으로 약속됨
+
+
+	: IOS Internetworking Operating System
+		: 라우터에서 사용되는 소프트웨어
+			: 라우터도 일종의 컴퓨터다
+			: 그러니까 pc의 window 처럼 라우터의 운영체제인거다
+
+	: 라우터의 내부 구성
+		
+		: 종류
+			(1) RAM Random Access Memory
+				: 파일들이 올라와서 동작되는 장소
+					: RAM에 올라가 있는 설정내용은 ‘Running-config’ 
+
+				: 휘발성 메모리이기 때문에 전원 차단시 모든 정보가 지워짐
+					: runnging config 를 저장하기 위해서는 NVRAM에 startup-config 로 저장해야됨
+
+			(2) NVRAM Non Volatile RAM
+				: 비휘발성 메모리
+				: 설정파일이 저장되어있다( routing table 등은 저장하지 않는다)
+					: NVRAM에 저장된 설정내용은 ‘Startup-config’
+
+			(3) Flash 메모리
+				: 주로 ios 이미지 파일이 저장됨
+				: 라우터에 새로운 기능이 추가되면 라우터 자체를 교환하는게 아니라 ios 를 업그레이드를 하면 된다.
+				: 비휘발성
+
+
+			(4) ROM Read Only Memory
+				: 펌웨어 (=router 의 가장 기본적인 내용) 저장
+					: 펌웨어 >> 하드웨어의 기본적인 작동,제어를 담당하는 소프트웨어.
+				: Bootstrap 
+					: 일종의 부팅 과정의 순서
+				: 특별한 경우가 아닌 이상 교체 잘 안함
+
+
+	:  Router 부팅 과정 
+ 		0) 전원 킴
+ 		1) Power on self test (POST)
+			: 자가진단
+ 		2) Load and run bootstrap code
+			: 부팅 순서 정함
+ 		3) Find the IOS software
+			: 운영체제 솦웨어 찾음
+ 		4) Load the IOS software
+			: 운영체제 솦웨어 올림 . 그러니까 실행
+ 		5) Find the configuration
+			: 설정파일 찾음
+ 		6) Load the configuration
+			: 설정파일 로드 (다이나믹, 스태틱 뭐 이런거 정의되있는)
+ 		7) Run
+			: 실행
+
+
+	: 라우터 접속 방법
+		1. Console cable
+			: 절차
+				1.라우터의 conolse 포트에 console cable 을 연결하고. 나머지 한쪽을 컴터의 serial 포트 에 연결
+					: 그러니까 라우터 하나가 "장비용 pc"랑 "다른라우터" 랑연결되있는 형태인거다
+
+				2. 연결 후 터미널 프로그램을 사용하여 접속
+					: 터미널
+						: 명령어를 치는 곳 >> 터미널 창
+						: 명령어를 치면 번역해 주는 얘 >> 쉘
+						: 하드웨어와 소프트 웨어를 연결해줌>> 커널
+			: Router 에 pc 를 직접 연결해야하고, console cable 이 필요하다는 단점이 있다
+
+		2. Telnet
+			: Router 를 관리할떄 가장 많이 사용하는 방법
+			: 라우터의 IP 주소를 알고, 논리적으로 통신이 가능한 상태면(=인터넷 되면) 장소와 상관 없이 접속해서 관리 가능하게 해주는거
+				: 초기 설치 시 혹은 논리적 통신이 불가한 상태면 telnet 을 사용하지 못함
+					: ip 가 필요하기 때문에 인터넷 같은게 안되면(=통신이 안되면) 사용이 불가능
+			: Telnet 을 가상 터미널 Virtual Terminal 이라고도 함
+
+		
+
+		종류
+			(1) ROMMON Mode
+				: 라우터의 패스워드를 모르거나, ios 이미지 파일에 이상이 생긴 경우 복구를 하기 위한 모드	
+			(2) Setup Mode
+				: NVRAM 에 저장된 Router 설정 파일이 없는 경우 자동으로 실행되는 모드
+					
+					: 질의 응답 방식으로 일일이 다 설정해야되서 개불편
+
+			(3) User mode 사용자 모드
+			(4) Privileged Mode 운영자 모드. 관리자 모드
+			(5) Global configuration Mode (설정 모드)
+			
+-------------------------------------------------------------------------------------------------------
+
+라우터 
+	: 라우터의 주 목적 중 하나는 라우팅이다
+		: 라우팅 >> packet 을 수신했을때 BestPath 를 찾아서 어느 경로로 전송할지 결정하는 것
+			: 라우터는 패킷을 forwarding 할때 routing table 을 확인하고 전송한다
+				: 포워딩 >> 전송
+
+	: 스위치는 목적지를 모르는 frame 을 flooding 하지만, router 는 목적지를 모르는 packet 을 Drop 시킨다.
+		: 그러니까 routing table 에 목적지 정보가 없는 packet 은 폐기한다
+		: flooding >> 연결되있는 모든 호스트에게 broadcast 로 패킷을 다 뿌리는 것
+
+	: routing table << 지도
+		:  privileged mode에서 ‘show ip route’ 명령어로 확인 가능
+		: '목적지 네트워크' ,  '해당 네트워크로 가기 위한 경로(interface )'  의 정보를 가지고 있다.
+		: best path 만이 routing table 에 올려진다.
+
+
+
+	: 라우터 프로토콜
+		: '라우터와 직접 연결되지 않은 목적지 네트워크로 가는 경로'를 알아내기 위해 사용하는 프로토콜
+			: 라우터는 '기본적'으로 자신과 직접 connected 네트워크 정보만을 라우팅 테이블에 가지고 있다
+				: 그러니까 각 router  끼리 통신하기 위해서 서로의 주소를 알아야되고(한쪽 라우터만 안다고 되는게 아니다), 라우팅 프로토콜이 이때 사용된다.
+
+			: 목적지까지 전송을 책임지지 않고 목적지 경로상의 다음 Router에게 packet 전달만을 한다.	
+				: 그러니까 처음 부터 길을 다 알고 가는게 아니라 중간 중간에 물어보면서 길 찾는거다
+			
+
+		: 종류
+			1. static Routing Protocol
+				: 관리자가 직접 목적지 네트워크 정보를 입력하는 프로토콜
+					: 그러니까 사람이 직접 목적지 대한 best path 찾ㅈ아 입력
+				: 장점
+					: 라우터가 best path 를 찾기 위한 계산을 하지 않기 때문에 cpu, memory가 절약되어 router 의 성능이 좋아진다.
+					: router 끼리 routing table 을 교환할 필요가 없어 대역폭을 절약할 수 있다
+					 :자신의 정보를 외부로 전송하지 않아 보안에 좋다
+
+				: 단점
+					: 사람이 수학적으로 어케 최적의 경로로 보낼지 일일이 계산한다
+						: 시행착오가 필요하다
+
+					: 대규모 네트워크에서는 사용하기 힘들다
+						: 경로에 이상이 생겨도 계속 그 경로로 전송된다. 관리자가 직접 오류를 잡고 변경해야한다.
+				: 소규모 네트워크 에서만 사용
+					: 거의 한 회사 내부적으로 . (리소스 소모가 적기도하고, 보안측면에서도)
+
+
+				:스태택 라우팅에서 꼭 필요한 정보 2가지
+					1. 목적지 서브넷 주소
+					2. 다음 라우터의 주소 or 현재 라우터의 출구 인터페이스
+
+				:  Static Routing Protocol 명령어
+					: Router(config)#ip route dest-Ip [subnet mask] {next-Hop address | exit interface} [distance]
+
+						: ip route 부분이 명령어 (고정)
+						:  dest-Ip
+							: 목적지의 ip 대역에 속하는 ip 를 의미한다
+								: 어차피 subnet mask 로 거름 당할거라서 networkId 만 목적지와 일치한다면 host id 를 어케 하건 별 상관 없다
+								: 대부분 host id 부분은 0 으로 하여 입력하는 편이다.
+						: subnet mask
+							: dest-ip 에서 networkID 를 뽑아내기 위하여 적는 서브넷 마스크이다
+
+
+						: next-Hop address | exit interface
+							: 중간의 작대기는 or 연산자
+							: next-hop address 를 선택하느냐 exit interface 를 선택하느냐 따라서 static routing protocol 의 종류가 나뉘는건 아니기 때문에 서로 다른 방식으로 명령어 쓴 라우터 끼리도 통신 가능하다
+
+							: next-Hop address
+								: 상대방 router 의 "입구"
+									: 설정하는 router 와 연결된 상대방 router 인터페이스의 주소(=nexthop 주소)
+								: 그러니까 상대 라우터의 ip 주소를 알고 그 라우터로 보내면 그 라우터가 알아서 자신이 속한 영역에서 해당 호스트에게 전달하게 할거니까
+
+							: exit interface
+								: 목적지 네트워크로 가기 위한 "라우터 자기 자신"의  "출구"
+								: 그러니까 상대 라우터의 ip 주소를 알고 그 라우터로 보내면 그 라우터가 알아서 자신이 속한 영역에서 해당 호스트에게 전달하게 할거니까
+
+					: distance << 
+						: 목적지까지 가기 위한 비용
+						: 비용이 적게 드는게 효율적이다
+						: 따로 지정하지 않는게 일반적이고, 따로 지정하는 경우는 우선순위를 주기 위함이다
+
+
+			2. Dynamic Routing Protocol
+				: 라우터가 직접  best path 찾아서 routing table 에 올리는 프로토콜
+				: '같은' Routing Protocol이 설정된 Router가 서로의 네트워크 정보를 교환하면서 Update한다
+					: 각 routing protocol 들은 best path 를 선택하는 기준이 다르기 때문에 서로 다른 routing protocol 은 서로 정보를 교환하지 않는다
+						: ex) rip 은 hop count , ospf 는 bandwidth 가 best path 선택 기준
+						: 그럼 가까이 있는 라우터라도 같은 프로토콜이 아니면 경유가 안되므로 비효우ㅠㄹ적이겠네?
+
+				: 목적지까지의 경로가 여러개이면 bestpath 만을 routing table 에 올리고, 나머지 경로들은 데이터 베이스에 저장한다
+					: bestPath 에 문제가 생기면 다음 순의 경로가 routing table 에 올라온다
+				: 종류
+					(1) distance vector Routing Protocol
+						: 순수 물리적으로 Best Path 를 설정
+						: 홉카운트만을 가지고 최적 경로를 연산
+							: 홉카운트 >> 경유하는 라우터의 개수
+							: 주로 소규모 네트워크에서 사용
+							: 비유 ) 역이 더 적어서 먼저 종착지에 도착할꺼다 
+						: ex) RIP, IGRP 프로토콜
+					(2) Link-state Routing Protocol
+						: 링크의 상태로 best path 를 설정
+						: 장치간의 속도 등 연결된 모든 정보를 종합해서 최적의 경로를 연산
+							: 주로 대규모 네트워크 에서 사용
+							: 비유) 지하철 속도가 더 빨라서 먼저 종착지에 도착할꺼다
+						: ex) OSPF, IS-IS
+
+				: 장점
+					: 관리자가 일일이 경로 입력할 필요 없다
+					: 선택된 경로에 문제가 생기면 스스로 새로운 경로 찾아 전송한다
+				: 단점
+					: router 의 cpu, memory 소모가 크다
+-------------------------------------------------------------------------------------------------------------------------
+static roouting protocol 실습
+	1.  일단 ' 라우터 하나 , 스위치 하나 , 호스트 2개  ' 세트를 2개 준비
+		(1) 스위치와 각 영역의 호스트를 straight-through , fastEthernet0/0 으로 연결
+		(2) 스위치와 각 영역의 라우터를 straight-through , fastEthernet0/0 으로 연결
+		(3) 각 영역의 라우터 설정 << 이거 해야 각 라우터끼리 serial cable 로 연결 가능
+			1. 전원끄고
+			2. wic-2t 넣고
+			3. 다시 전원킴
+		(4)  라우터 끼리 serial cable 로, seiral 어쩌구 방식으로 연결
+		(5) 노트북꺼내서 라우터에 콘솔 케이블 연결해서 두 라우터 각각 설저ㅇ해줌
+Continue with configuration dialog? [yes/no]: no
+Router>en 
+Router#conf t
+Router(config)#no ip domain-l
+Router(config)#ena sec kgitbank1004 
+	: 라우터의 기본 설정
+
+Router(config)#line con 0
+Router(config-line)#pass kgitbank1004
+Router(config-line)#login
+Router(config-line)#logging sy
+Router(config-line)#exec-timeout 0 0
+Router(config-line)#line vty 0 4
+	: 텔넷 접속을 
+Router(config-line)#pass kgitbank1004
+Router(config-line)#login
+Router(config-line)#^Z
+Router#copy r s
+	: 콘솔 인터페이스의 설정
+
+Router#conf t
+Router(config)#int fa0/0
+Router(config-if)#ip add 172.168.10.254 255.255.255.0
+Router(config-if)#no sh
+	: 라우터의 lan 구간의 인터페이스 ip등록 과 활성화
+
+Router(config-if)#int ser0/0
+Router(config-if)#ip address 10.10.10.1 255.255.255.0
+Router(config-if)#no sh
+Router(config-if)#^Z
+	: 라우터의 wan 구간의 인터페이스 ip등록과 활성화
+
+Router#copy r s
+
+
+		(6) 각 라우터에 다시 콘솔 연결하고 static routing protocol 명령어 입력
+			: 학습 차원에서 각각 exit interface, nest-hop ip 로 함 	
+			: 이 프로토콜을 통하여 외부 ip 대역에 있는 얘를 저장 가능
+			1. 첫번째 라우터에선 >> Router(config)#ip route 192.168.10.0 255.255.255.0 se0/0
+				: 현재 라우터의 출구 interface 포트 선택
+					: 그러니까 현재 라우터에 연결된 serial 케이블을 통하여 상대 라우터를 저장 
+
+			2. 두번째 라우터에선 >> Router(config)#ip route 172.168.10.0 255.255.255.0 10.10.10.1
+				: 상대 라우터의 입구 ip 주소 선택
+					: 그러니까 상대 라우터의 입구ip 를 기준으로 상대 라우터를 저장
+
+		(7) pc 172.168.10.1의 프롬프트 창에서  192.168.10.1 로 핑 날림
+			:  PC>ping 192.168.10.1
+
+
+
+
+gateway
+	: 현재 소속되있는 네트워크에서 외부로 나가는 출입구
+		: 그러니까 라우터의 입구
+	: 현재 소속되있는 네트워크와 같은 ip 대역에 속해있다
+		: 대부분 "같은 networkID"+". 254" 로 한다 
+		: 제주도를 가기 위해 우리는 "우리집"의 현관문을 최초로 열어야한다
+	: 게이트 웨이 자체가 공유기이다
+
+
+
+-------------------------------------------------------------------------------------------------------------------------
+: 옛날에는 와이파이끼리 겹치는 구간에 있음 장치에 별로 않좋았다
+						:  스마트폰의 와이파이 잡는 부분이 양쪽 와아파이에서 왔다갔다 거리게 되어 성능저하 됬었다
+						: 요즘에는 처음 연결된 와이파이를 유지하는 방식으로 프로그래밍 되서 이렇진 않다.
+
+
+				: 내 컴퓨터의 프롬프트 창에서 route print -4
+					: -4 >> version 4 만 보겠다는 뜻
+						: 잘 사용하는 버전은 아님 . 
+
+ip 대역 이랑 네트워크 대역 은 다른 의미이다
+
+ip 대역이 동일하다 의 의미
+	: networkID 가 동일한 ip 들
+
+네트워크 대역폭 BandWidth
+	: 일정 시간 동안 네트워크 통해 전송 가능한 용량
+
