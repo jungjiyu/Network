@@ -1,0 +1,236 @@
+https://secdata.tistory.com/10
+
+
+		: 종류
+			1. static Routing Protocol
+				: 관리자가 직접 목적지 네트워크 정보를 입력하는 프로토콜
+					: 그러니까 사람이 직접 목적지 대한 best path 찾ㅈ아 입력
+				: 장점
+					: 라우터가 best path 를 찾기 위한 계산을 하지 않기 때문에 cpu, memory가 절약되어 router 의 성능이 좋아진다.
+					: router 끼리 routing table 을 교환할 필요가 없어 대역폭을 절약할 수 있다
+					 :자신의 정보를 외부로 전송하지 않아 보안에 좋다
+
+				: 단점
+					: 사람이 수학적으로 어케 최적의 경로로 보낼지 일일이 계산한다
+						: 시행착오가 필요하다
+
+					: 대규모 네트워크에서는 사용하기 힘들다
+						: 경로에 이상이 생겨도 계속 그 경로로 전송된다. 관리자가 직접 오류를 잡고 변경해야한다.
+				: 소규모 네트워크 에서만 사용
+					: 거의 한 회사 내부적으로 . (리소스 소모가 적기도하고, 보안측면에서도)
+
+
+				:스태택 라우팅에서 꼭 필요한 정보 2가지
+					1. 목적지 서브넷 주소
+					2. 다음 라우터의 주소 or 현재 라우터의 출구 인터페이스
+
+				:  Static Routing Protocol 명령어
+					: Router(config)#ip route dest-Ip [subnet mask] {next-Hop address | exit interface} [distance]
+
+						: ip route 부분이 명령어 (고정)
+						:  dest-Ip
+							: 목적지의 ip 대역에 속하는 ip 를 의미한다
+								: 어차피 subnet mask 로 거름 당할거라서 networkId 만 목적지와 일치한다면 host id 를 어케 하건 별 상관 없다
+								: 대부분 host id 부분은 0 으로 하여 입력하는 편이다.
+						: subnet mask
+							: dest-ip 에서 networkID 를 뽑아내기 위하여 적는 서브넷 마스크이다
+
+
+						: next-Hop address | exit interface
+							: 중간의 작대기는 or 연산자
+							: next-hop address 를 선택하느냐 exit interface 를 선택하느냐 따라서 static routing protocol 의 종류가 나뉘는건 아니기 때문에 서로 다른 방식으로 명령어 쓴 라우터 끼리도 통신 가능하다
+
+							: next-Hop address
+								: 상대방 router 의 "입구"
+									: 설정하는 router 와 연결된 상대방 router 인터페이스의 주소(=nexthop 주소)
+								: 그러니까 상대 라우터의 ip 주소를 알고 그 라우터로 보내면 그 라우터가 알아서 자신이 속한 영역에서 해당 호스트에게 전달하게 할거니까
+
+							: exit interface
+								: 목적지 네트워크로 가기 위한 "라우터 자기 자신"의  "출구"
+								: 그러니까 상대 라우터의 ip 주소를 알고 그 라우터로 보내면 그 라우터가 알아서 자신이 속한 영역에서 해당 호스트에게 전달하게 할거니까
+
+					: distance << 
+						: 목적지까지 가기 위한 비용
+						: 비용이 적게 드는게 효율적이다
+						: 따로 지정하지 않는게 일반적이고, 따로 지정하는 경우는 우선순위를 주기 위함이다
+
+
+			2. Dynamic Routing Protocol
+				: 라우터가 직접  best path 찾아서 routing table 에 올리는 프로토콜
+				: '같은' Routing Protocol이 설정된 Router가 서로의 네트워크 정보를 교환하면서 Update한다
+					: 각 routing protocol 들은 best path 를 선택하는 기준이 다르기 때문에 서로 다른 routing protocol 은 서로 정보를 교환하지 않는다
+						: ex) rip 은 hop count , ospf 는 bandwidth 가 best path 선택 기준
+						: 그럼 가까이 있는 라우터라도 같은 프로토콜이 아니면 경유가 안되므로 비효우ㅠㄹ적이겠네?
+
+				: 목적지까지의 경로가 여러개이면 bestpath 만을 routing table 에 올리고, 나머지 경로들은 데이터 베이스에 저장한다
+					: bestPath 에 문제가 생기면 다음 순의 경로가 routing table 에 올라온다
+				: 종류
+					(1) distance vector Routing Protocol
+						: 순수 물리적으로 Best Path 를 설정
+						: 홉카운트만을 가지고 최적 경로를 연산
+							: 홉카운트 >> 경유하는 라우터의 개수
+							: 주로 소규모 네트워크에서 사용
+							: 비유 ) 역이 더 적어서 먼저 종착지에 도착할꺼다 
+						: ex) RIP, IGRP 프로토콜
+					(2) Link-state Routing Protocol
+						: 링크의 상태로 best path 를 설정
+						: 장치간의 속도 등 연결된 모든 정보를 종합해서 최적의 경로를 연산
+							: 주로 대규모 네트워크 에서 사용
+							: 비유) 지하철 속도가 더 빨라서 먼저 종착지에 도착할꺼다
+						: ex) OSPF, IS-IS
+
+				: 장점
+					: 관리자가 일일이 경로 입력할 필요 없다
+					: 선택된 경로에 문제가 생기면 스스로 새로운 경로 찾아 전송한다
+				: 단점
+					: router 의 cpu, memory 소모가 크다
+
+-------------------------------------------------------------------------------------------------------------------------
+static roouting protocol 실습
+	1.  일단 ' 라우터 하나 , 스위치 하나 , 호스트 2개  ' 세트를 2개 준비
+		(1) 스위치와 각 영역의 호스트를 straight-through , fastEthernet0/0 으로 연결
+		(2) 스위치와 각 영역의 라우터를 straight-through , fastEthernet0/0 으로 연결
+		(3) 각 영역의 라우터 설정 << 이거 해야 각 라우터끼리 serial cable 로 연결 가능
+			1. 전원끄고
+			2. wic-2t 넣고
+			3. 다시 전원킴
+		(4)  라우터 끼리 serial cable 로, seiral 어쩌구 방식으로 연결
+		(5) 노트북꺼내서 라우터에 콘솔 케이블 연결해서 두 라우터 각각 설저ㅇ해줌
+Continue with configuration dialog? [yes/no]: no
+Router>en 
+Router#conf t
+Router(config)#no ip domain-l
+Router(config)#ena sec kgitbank1004 
+	: 라우터의 기본 설정
+
+Router(config)#line con 0
+Router(config-line)#pass kgitbank1004
+Router(config-line)#login
+Router(config-line)#logging sy
+Router(config-line)#exec-timeout 0 0
+Router(config-line)#line vty 0 4
+	: 텔넷 접속을 
+Router(config-line)#pass kgitbank1004
+Router(config-line)#login
+Router(config-line)#^Z
+Router#copy r s
+	: 콘솔 인터페이스의 설정<< 뭐가됬건(내부 호스트들이 없고단순 라우터와 라우터를 잇는 라우터라도) 라우터면 기본적으로 해줘야됨
+
+Router#conf t
+Router(config)#int fa0/0
+Router(config-if)#ip add 172.168.10.254 255.255.255.0
+Router(config-if)#no sh
+	: 라우터의 lan 구간의 인터페이스 ip등록 과 활성화
+
+Router(config-if)#int ser0/0
+Router(config-if)#ip address 10.10.10.1 255.255.255.0
+Router(config-if)#no sh
+Router(config-if)#^Z
+	: 라우터의 wan 구간의 인터페이스 ip등록과 활성화
+
+Router#copy r s
+
+
+		(6) 각 라우터에 다시 콘솔 연결하고 static routing protocol 명령어 입력
+			: 학습 차원에서 각각 exit interface, nest-hop ip 로 함 	
+			: 이 프로토콜을 통하여 외부 ip 대역에 있는 얘를 저장 가능
+			1. 첫번째 라우터에선 >>두
+				: 현재 라우터의 출구 interface 포트 선택
+					: 그러니까 현재 라우터에 연결된 serial 케이블을 통하여 상대 라우터를 저장 
+
+			2. 두번째 라우터에선 >> Router(config)#ip route 172.168.10.0 255.255.255.0 10.10.10.1
+				: 상대 라우터의 입구 ip 주소 선택
+					: 그러니까 상대 라우터의 입구ip 를 기준으로 상대 라우터를 저장
+
+		(7) pc 172.168.10.1의 프롬프트 창에서  192.168.10.1 로 핑 날림
+			:  PC>ping 192.168.10.1
+
+
+Router#show ip route
+	: 라우팅 테이블 확인 가능
+
+
+-------------------------------------------------------------------------------------------------------------------------
+:WIC-2T 모듈 하나당 serial port 2 개씩 생긴다
+: 연결되있는 각 라우터의 시리얼 포트번호가 달라도 상관 없다
+	: 한쪽은 0/0 이고 , 한쪽
+
+
+주의 >> 죄다 serial0/0 인게 아니다. 라우터와 라우터를 잇는 경우 한쪽은 serial 0/0 , 다른 쪽은 serial0/1 로 해줘야된다.
+
+	: 중간의 라우터에서만 그런거고 , 양쪽 끝의 라우터들은 serial0/0 으로 해준다.
+
+
+ping 날렸는데 request time out  에러 나오는 이유
+	: 목적지까지는 갔는데 되돌아오지 못한다
+	: 방화벽 문제
+	: naver.com 에 ping 날렸을때 요청시간 만료됬다고 나오는거랑 같은 맥락임
+	: https://blog.naver.com/skdh88/110144239760
+
+ping 날렸는데 destinaion host unreachable 에러 나오는 이유
+	: ip 잘못입력했거나 그런거임
+
+
+-------------------------------------------------------------------------------------------------------------------------
+
+텔넷 접속하기
+	: 해당 라우터 영역의 pc 의 프롬프트 창에서
+telnet 10.10.10.1
+	: 현재 라우터의 serial port 의 ip 주소를 대상으로 telnet 명령어 사용
+		: 다른 라우터의 serial port 의 ip 주소를 대상으로 쓰면 못알아먹는다
+			: 모든 경로가 라우팅 테이블에 등록되어있는게 아니니까
+				: 하라고 하면 등록할 수 있긴 한데 가까운 것만 등록하는걸 추천
+	: 그럼 우리가 라우터의 cli 창에서 했었던거 그대로 할 수 있음
+
+eixt
+	: 할거다 했음 일반 cmd 모드로 돌아옴
+
+
+-------------------------------------------------------------------------------------------------------------------------
+
+router0 이 핵심 
+ip route 0.0.0.0 0.0.0.0 10.10.10.2  << 디폴트 라우팅
+		1	2		3
+
+	0.0.0.0 << 모든 ip 를 의미
+		1 >>  0.0.0.0 == 모든 호스트
+		2 >>   0.0.0.0 == 모든 서브넷 주소
+	3 >> 1번과 2	ㅓㄴ의 대상들이 출입할 수 있는 출입구(게이트웨이)
+	결과적으론 대상을 가리지 않겠다
+		: 그렇다고 브로드캐스트인건 아니다
+
+Default routing
+	: 우리는 수많은 서비스를 사용중이다. 이는 수많은 네트워크와 통신을 해야한다는 뜻이기도 하다.	
+	: 그래서 모든 대상들과 통신을 할 ㅜㅅ 잇어야하는 문법이 필요한데 이를 default 라우팅이라한다
+	***: 이 default routing 은 게이트 웨이를 지정하면 자동 생성된다
+	: default routing 은 모든 네트워크에 적용할 수 없다(보안 취약)
+		: 모든 라우터에 대해 접근이 허용되면 좀 그러니까
+	: 그래서 중단점이나, end-device 에 사용되는 문법이다
+		:: end-device << 
+
+cmd 창에서 route print -4 로 확인 가능
+
+
+-------------------------------------------------------------------------------------------------------------------------
+
+Dynamic routing 
+RIP
+	: distance vector 라우팅 프로토콜 << 홉카운트로만 연산
+	: v1 과 v2 가 있다
+		: v1
+			: classful 한 라우팅만 가능 (VLSM 지원하지 않음)
+				: ip 가 subneting 된 경우 사용  불가
+		: v2
+			: classless 한 라우팅도 가능(VLSM 지원)
+
+	: 장젖
+		: 설정 간단	
+		: 작은 규모의 네트워크나 대형 네트워크 말단 지점에서 사용ㅎㅏ기 좋다
+		: 표준 라우팅 프로토콜이라 모든 장비에서 사용 가능하다
+	: 단점
+		: hop count 로만 best path 를 연산하기 때문에 속도 반영이 되지 않는다
+			: 복ㅈ잡 네트웤에서 비효율적
+		: 최대 15 hop 까지만 지원되어 초과하는 경우 ㅗㅌㅇ신 불가능 간주한다
+		: 정보 전송이 비효율적이다
+			: 30 초마다 일정라우터에 정보 전달함 (변동사항과 상관 없이 )
+			: 대역폭 많이 잡아먹음
